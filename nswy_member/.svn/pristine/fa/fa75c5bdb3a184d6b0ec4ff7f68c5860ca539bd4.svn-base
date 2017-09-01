@@ -1,0 +1,13 @@
+package com.ovit.bee.IDao;
+
+import com.ovit.bee.pojo.PolicyDetail;
+
+public interface PolicyDetailMapper {
+    
+    PolicyDetail selectByPrimaryKey(Integer id);
+    
+    void updateThumbUpNum(PolicyDetail record);
+    
+    void inset(PolicyDetail record);
+
+}

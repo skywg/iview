@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ovit.bee.IDao.InfoCommentMapper" >
+  <resultMap id="BaseResultMap" type="com.ovit.bee.pojo.InfoComment" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="information_detail_id" property="informationDetailId" jdbcType="INTEGER" />
+    <result column="user_account" property="userAccount" jdbcType="VARCHAR" />
+    <result column="user_name" property="userName" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="thumb_up_num" property="thumbUpNum" jdbcType="INTEGER" />
+    <result column="post_id" property="postId" jdbcType="INTEGER" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.ovit.bee.pojo.InfoComment" extends="BaseResultMap" >
+    <result column="content" property="content" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, information_detail_id, user_account, user_name, create_time, thumb_up_num, post_id
+  </sql>
+  <sql id="Blob_Column_List" >
+    content
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from info_comment
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+    <!-- 查询评论结果 -->
+  <select id="findInfoComment" resultMap="BaseResultMap" parameterType="com.ovit.bee.pojo.InfoComment" >
+    select 
+    <include refid="Base_Column_List" />
+	,
+    <include refid="Blob_Column_List" />
+    from info_comment
+    where 1=1
+    <if test="informationDetailId != null" >
+     	and	information_detail_id = #{informationDetailId}
+    </if>
+     
+  </select>
+  
+  <select id="findInfoCommentId" resultMap="BaseResultMap" parameterType="com.ovit.bee.pojo.InfoComment" >
+    select 
+    <include refid="Base_Column_List" />
+	,
+    <include refid="Blob_Column_List" />
+    from info_comment
+    where id = #{id}
+  </select>
+  
+  <!-- 查询我的评论 -->
+  <select id="findMyComment" resultMap="BaseResultMap" parameterType="com.ovit.bee.pojo.InfoComment" >
+    select 
+    <include refid="Base_Column_List" />
+	,
+    <include refid="Blob_Column_List" />
+    from info_comment
+    where information_detail_id = #{informationDetailId} and user_account = #{userAccount}
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from info_comment
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  
+  <insert id="insert" parameterType="com.ovit.bee.pojo.InfoComment" >
+    insert into info_comment (id, information_detail_id, user_account, 
+      user_name, create_time, thumb_up_num, 
+      post_id, content)
+    values (#{id,jdbcType=INTEGER}, #{informationDetailId,jdbcType=INTEGER}, #{userAccount,jdbcType=VARCHAR}, 
+      #{userName,jdbcType=VARCHAR},now(), #{thumbUpNum,jdbcType=INTEGER}, 
+      #{postId,jdbcType=INTEGER}, #{content,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ovit.bee.pojo.InfoComment" >
+    insert into info_comment
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="informationDetailId != null" >
+        information_detail_id,
+      </if>
+      <if test="userAccount != null" >
+        user_account,
+      </if>
+      <if test="userName != null" >
+        user_name,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="thumbUpNum != null" >
+        thumb_up_num,
+      </if>
+      <if test="postId != null" >
+        post_id,
+      </if>
+      <if test="content != null" >
+        content,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="informationDetailId != null" >
+        #{informationDetailId,jdbcType=INTEGER},
+      </if>
+      <if test="userAccount != null" >
+        #{userAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="userName != null" >
+        #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+       now(),
+      </if>
+      <if test="thumbUpNum != null" >
+        #{thumbUpNum,jdbcType=INTEGER},
+      </if>
+      <if test="postId != null" >
+        #{postId,jdbcType=INTEGER},
+      </if>
+      <if test="content != null" >
+        #{content,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ovit.bee.pojo.InfoComment" >
+    update info_comment
+    <set >
+      <if test="informationDetailId != null" >
+        information_detail_id = #{informationDetailId,jdbcType=INTEGER},
+      </if>
+      <if test="userAccount != null" >
+        user_account = #{userAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="userName != null" >
+        user_name = #{userName,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time =now(),
+      </if>
+      <if test="thumbUpNum != null" >
+        thumb_up_num = #{thumbUpNum,jdbcType=INTEGER},
+      </if>
+      <if test="postId != null" >
+        post_id = #{postId,jdbcType=INTEGER},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.ovit.bee.pojo.InfoComment" >
+    update info_comment
+    set information_detail_id = #{informationDetailId,jdbcType=INTEGER},
+      user_account = #{userAccount,jdbcType=VARCHAR},
+      user_name = #{userName,jdbcType=VARCHAR},
+      create_time =now(),
+      thumb_up_num = #{thumbUpNum,jdbcType=INTEGER},
+      post_id = #{postId,jdbcType=INTEGER},
+      content = #{content,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ovit.bee.pojo.InfoComment" >
+    update info_comment
+    set information_detail_id = #{informationDetailId,jdbcType=INTEGER},
+      user_account = #{userAccount,jdbcType=VARCHAR},
+      user_name = #{userName,jdbcType=VARCHAR},
+      create_time =now(),
+      thumb_up_num = #{thumbUpNum,jdbcType=INTEGER},
+      post_id = #{postId,jdbcType=INTEGER}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateThumbUpNum" parameterType="com.ovit.bee.pojo.InfoComment" >
+    update info_comment
+    set 
+      	thumb_up_num = #{thumbUpNum,jdbcType=INTEGER}
+     
+    	where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

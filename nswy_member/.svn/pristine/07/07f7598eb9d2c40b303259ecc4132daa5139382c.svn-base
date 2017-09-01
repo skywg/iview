@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ovit.bee.IDao.UserInfoMapper" >
+  <resultMap id="BaseResultMap" type="com.ovit.bee.pojo.UserInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="account" property="account" jdbcType="VARCHAR" />
+    <result column="real_name" property="realName" jdbcType="VARCHAR" />
+    <result column="rece" property="rece" jdbcType="VARCHAR" />
+    <result column="birdhday" property="birdhday" jdbcType="DATE" />
+    <result column="job" property="job" jdbcType="VARCHAR" />
+    <result column="species" property="species" jdbcType="VARCHAR" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.ovit.bee.pojo.UserInfo" extends="BaseResultMap" >
+    <result column="dscription" property="dscription" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, account, real_name, rece, birdhday, job, species
+  </sql>
+  <sql id="Blob_Column_List" >
+    dscription
+  </sql>
+  <select id="findUserInfo" resultMap="BaseResultMap" parameterType="com.ovit.bee.pojo.UserInfo" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from user_info
+    where account = #{account,jdbcType=VARCHAR}
+  </select>
+
+  <insert id="insert" parameterType="com.ovit.bee.pojo.UserInfo" >
+    insert into user_info (id, account, real_name, 
+      rece, birdhday, job, species, 
+      dscription)
+    values (#{id,jdbcType=INTEGER}, #{account,jdbcType=VARCHAR}, #{realName,jdbcType=VARCHAR}, 
+      #{rece,jdbcType=VARCHAR}, #{birdhday,jdbcType=DATE}, #{job,jdbcType=VARCHAR}, #{species,jdbcType=VARCHAR}, 
+      #{dscription,jdbcType=LONGVARCHAR})
+  </insert>
+  
+  
+  <update id="updateUserInfo" parameterType="com.ovit.bee.pojo.UserInfo" >
+    update user_info
+    <set >
+      <if test="realName != null" >
+        real_name = #{realName,jdbcType=VARCHAR},
+      </if>
+      <if test="rece != null" >
+        rece = #{rece,jdbcType=VARCHAR},
+      </if>
+      <if test="birdhday != null" >
+        birdhday = #{birdhday,jdbcType=DATE},
+      </if>
+      <if test="job != null" >
+        job = #{job,jdbcType=VARCHAR},
+      </if>
+      <if test="species != null" >
+        species = #{species,jdbcType=VARCHAR},
+      </if>
+      <if test="dscription != null" >
+        dscription = #{dscription,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where account = #{account,jdbcType=VARCHAR}
+  </update>
+
+</mapper>

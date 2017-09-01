@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ovit.bee.IDao.PolicyMapper" >
+  <resultMap id="BaseResultMap" type="com.ovit.bee.pojo.Policy" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="information_detail_id" property="informationDetailId" jdbcType="INTEGER" />
+    <result column="business_information" property="businessInformation" jdbcType="VARCHAR" />
+    <result column="all_range" property="allRange" jdbcType="VARCHAR" />
+    <result column="business_nature" property="businessNature" jdbcType="VARCHAR" />
+    <result column="all_business" property="allBusiness" jdbcType="VARCHAR" />
+    <result column="title" property="title" jdbcType="VARCHAR" />
+    <result column="image_add" property="imageAdd" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="comment_num" property="commentNum" jdbcType="INTEGER" />
+    <result column="label" property="label" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, information_detail_id, business_information, all_range, business_nature, all_business, 
+    title, image_add, create_time, comment_num, label
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from policy
+    where id = #{id,jdbcType=INTEGER} ORDER BY create_time desc
+  </select>
+  
+  <select id="findPolicy" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from policy ORDER BY create_time desc
+  </select>
+  
+    <!-- 搜索 查询资讯表，并在后台通过PAGE实现分页 -->
+  <select id="findPolicyTitle" resultMap="BaseResultMap" parameterType="com.ovit.bee.pojo.Policy" >
+    select 
+    <include refid="Base_Column_List" />
+    from policy where 1=1
+     <if test="title != null" >
+        AND title like concat(concat('%',#{title}),'%') 
+		
+      </if>
+      ORDER BY create_time desc
+  </select>
+  
+  <select id="findIndexPolicy" resultMap="BaseResultMap" parameterType="com.ovit.bee.pojo.Policy" >
+    select 
+        <include refid="Base_Column_List" />
+    from policy
+    where 1=1
+    <if test="docType != null" >
+     	and	docType = #{docType}
+    </if>
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from policy
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.ovit.bee.pojo.Policy" >
+    insert into policy (id, information_detail_id, business_information, 
+      all_range, business_nature, all_business, 
+      title, image_add, create_time, 
+      comment_num, label)
+    values (#{id,jdbcType=INTEGER}, #{informationDetailId,jdbcType=INTEGER}, #{businessInformation,jdbcType=VARCHAR}, 
+      #{allRange,jdbcType=VARCHAR}, #{businessNature,jdbcType=VARCHAR}, #{allBusiness,jdbcType=VARCHAR}, 
+      #{title,jdbcType=VARCHAR}, #{imageAdd,jdbcType=VARCHAR},now(), 
+      #{commentNum,jdbcType=INTEGER}, #{label,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ovit.bee.pojo.Policy" >
+    insert into policy
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="informationDetailId != null" >
+        information_detail_id,
+      </if>
+      <if test="businessInformation != null" >
+        business_information,
+      </if>
+      <if test="allRange != null" >
+        all_range,
+      </if>
+      <if test="businessNature != null" >
+        business_nature,
+      </if>
+      <if test="allBusiness != null" >
+        all_business,
+      </if>
+      <if test="title != null" >
+        title,
+      </if>
+      <if test="imageAdd != null" >
+        image_add,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+      <if test="commentNum != null" >
+        comment_num,
+      </if>
+      <if test="label != null" >
+        label,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="informationDetailId != null" >
+        #{informationDetailId,jdbcType=INTEGER},
+      </if>
+      <if test="businessInformation != null" >
+        #{businessInformation,jdbcType=VARCHAR},
+      </if>
+      <if test="allRange != null" >
+        #{allRange,jdbcType=VARCHAR},
+      </if>
+      <if test="businessNature != null" >
+        #{businessNature,jdbcType=VARCHAR},
+      </if>
+      <if test="allBusiness != null" >
+        #{allBusiness,jdbcType=VARCHAR},
+      </if>
+      <if test="title != null" >
+        #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="imageAdd != null" >
+        #{imageAdd,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+       now(),
+      </if>
+      <if test="commentNum != null" >
+        #{commentNum,jdbcType=INTEGER},
+      </if>
+      <if test="label != null" >
+        #{label,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ovit.bee.pojo.Policy" >
+    update policy
+    <set >
+      <if test="informationDetailId != null" >
+        information_detail_id = #{informationDetailId,jdbcType=INTEGER},
+      </if>
+      <if test="businessInformation != null" >
+        business_information = #{businessInformation,jdbcType=VARCHAR},
+      </if>
+      <if test="allRange != null" >
+        all_range = #{allRange,jdbcType=VARCHAR},
+      </if>
+      <if test="businessNature != null" >
+        business_nature = #{businessNature,jdbcType=VARCHAR},
+      </if>
+      <if test="allBusiness != null" >
+        all_business = #{allBusiness,jdbcType=VARCHAR},
+      </if>
+      <if test="title != null" >
+        title = #{title,jdbcType=VARCHAR},
+      </if>
+      <if test="imageAdd != null" >
+        image_add = #{imageAdd,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time =now(),
+      </if>
+      <if test="commentNum != null" >
+        comment_num = #{commentNum,jdbcType=INTEGER},
+      </if>
+      <if test="label != null" >
+        label = #{label,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ovit.bee.pojo.Policy" >
+    update policy
+    set information_detail_id = #{informationDetailId,jdbcType=INTEGER},
+      business_information = #{businessInformation,jdbcType=VARCHAR},
+      all_range = #{allRange,jdbcType=VARCHAR},
+      business_nature = #{businessNature,jdbcType=VARCHAR},
+      all_business = #{allBusiness,jdbcType=VARCHAR},
+      title = #{title,jdbcType=VARCHAR},
+      image_add = #{imageAdd,jdbcType=VARCHAR},
+      create_time =now(),
+      comment_num = #{commentNum,jdbcType=INTEGER},
+      label = #{label,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,187 @@
+package com.ovit.bee.service.impl;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.ovit.bee.IDao.PolicyCommentMapper;
+import com.ovit.bee.IDao.PolicyDetailMapper;
+import com.ovit.bee.IDao.PolicyMapper;
+import com.ovit.bee.pojo.Knowledge;
+import com.ovit.bee.pojo.PolicyComment;
+import com.ovit.bee.pojo.Policy;
+import com.ovit.bee.pojo.PolicyDetail;
+import com.ovit.bee.service.PolicyService;
+
+@Service
+public class PolicyServiceImpl implements PolicyService{
+	
+	@Autowired
+	private PolicyMapper policyMapper;
+	
+	@Autowired
+	private PolicyDetailMapper policyDetailMapper;
+	
+	@Autowired
+	private PolicyCommentMapper policyCommentMapper;
+	
+	@Override
+	public  PageInfo<Policy> findPolicy(int pageNum, int pageSize){
+		PageHelper.startPage(pageNum, pageSize);
+		List<Policy> list = policyMapper.findPolicy();
+		return new PageInfo<Policy>(list);
+
+	}
+	
+	@Override
+	public PolicyDetail findPolicyDetail(String id ){
+		PolicyDetail policyDetail  = policyDetailMapper.selectByPrimaryKey(Integer.valueOf(id));
+		return policyDetail;
+	}
+	
+	@Override
+	public  PageInfo<Policy> findPolicyTitle(int pageNum, String title,int pageSize){
+		PageHelper.startPage(pageNum, pageSize);
+		Policy policy = new Policy();
+		policy.setTitle(title);
+		List<Policy> list = policyMapper.findPolicyTitle(policy);
+		return new PageInfo<Policy>(list);
+
+	}
+	
+	@Override
+	public PageInfo<PolicyComment> findPolicyComment(int pageNum, int pageSize,Integer informationDetailId){
+		PageHelper.startPage(pageNum, pageSize);
+		PolicyComment info = new PolicyComment();
+		info.setInformationDetailId(informationDetailId);
+		List<PolicyComment> policyComment = policyCommentMapper.findPolicyComment(info);
+		TreeUtil util = new TreeUtil(policyComment);
+		List<PolicyComment> lists = util.createTreeList();
+		return new PageInfo<PolicyComment>(lists);
+	}
+	
+	class TreeUtil {
+		private List<PolicyComment> treeNodeList = new ArrayList<PolicyComment>();
+
+		public TreeUtil(List<PolicyComment> list) {
+			for (PolicyComment comment : list) {
+				if (null == comment.getPostId()) {
+					comment.setPostId(0);
+				}
+				treeNodeList.add(comment);
+			}
+		}
+
+		public List<PolicyComment> createTreeList() {
+			PolicyComment root = generateTreeNode(0);
+			return root.getList();
+		}
+
+		/**
+		 * 
+		 * @param nodeId
+		 * @return
+		 */
+		private PolicyComment getNodeById(int nodeId) {
+			PolicyComment treeNode = new PolicyComment();
+			for (PolicyComment item : treeNodeList) {
+				if (item.getId() == nodeId) {
+					treeNode = item;
+					break;
+				}
+			}
+			return treeNode;
+		}
+
+		/**
+		 * 
+		 * @param nodeId
+		 * @return
+		 */
+		private List<PolicyComment> getChildrenNodeById(int nodeId) {
+			List<PolicyComment> childrenTreeNode = new ArrayList<PolicyComment>();
+			for (PolicyComment item : treeNodeList) {
+				if (item.getPostId().intValue() == nodeId) {
+					childrenTreeNode.add(item);
+				}
+			}
+			return childrenTreeNode;
+		}
+
+		/**
+		 * 递归生成Tree结构数据
+		 * 
+		 * @param rootId
+		 * @return
+		 */
+		private PolicyComment generateTreeNode(int rootId) {
+			PolicyComment root = this.getNodeById(rootId);
+			List<PolicyComment> childrenTreeNode = this
+					.getChildrenNodeById(rootId);
+			for (PolicyComment item : childrenTreeNode) {
+				PolicyComment node = this.generateTreeNode(item.getId());
+				if (null == root.getList()) {
+					List<PolicyComment> children = new ArrayList<PolicyComment>();
+					root.setList(children);
+				}
+				root.getList().add(node);
+			}
+			return root;
+		}
+	}
+	
+	
+	@Override
+	public Integer findPolicyCommentCount(Integer id){
+		PolicyComment info = new PolicyComment();
+		info.setInformationDetailId(id);
+		List<PolicyComment> policyComment = policyCommentMapper.findPolicyComment(info);
+		
+		return policyComment.size();
+	}
+	
+	@Override
+	public List<PolicyComment> findMyComment(int pageNum, int pageSize,PolicyComment info){
+		PageHelper.startPage(pageNum, pageSize);
+		List<PolicyComment> policyComment = policyCommentMapper.findMyComment(info);
+		TreeUtil util = new TreeUtil(policyComment);
+		List<PolicyComment> lists = util.createTreeList();
+		return lists;
+	}
+	
+	@Override
+	public PolicyComment update(PolicyComment info){
+		List<PolicyComment> policyComment = policyCommentMapper.findPolicyCommentId(info);
+		if(policyComment.size()>0){
+			PolicyComment record  = policyComment.get(0);
+			record.setThumbUpNum(record.getThumbUpNum()+1);
+			policyCommentMapper.updateThumbUpNum(record);
+			return record;
+		}
+		return null;
+	}
+	
+	
+	@Override
+	public void insert(PolicyComment info){
+		
+		policyCommentMapper.insert(info);
+	}
+	
+	@Override
+	public PolicyDetail upvote(Integer id){
+		PolicyDetail infor  = policyDetailMapper.selectByPrimaryKey(id);
+		if(infor!=null){
+			infor.setThumbUpNum(infor.getThumbUpNum()+1);
+			policyDetailMapper.updateThumbUpNum(infor);
+			return infor;
+		}
+		return null;
+	}
+	
+}

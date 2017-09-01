@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="RegisterMapper">
+
+
+	<insert id="saveRegister" parameterType="pd">
+	INSERT INTO login_user
+		(id,unique_id,login_account,display_name,login_passwd,register_time,is_Identity_verification,tour_number,user_type)
+	VALUES
+		(#{id},#{unique_id}, #{login_account},#{display_name},#{login_passwd},#{register_time},#{is_Identity_verification},#{tour_number},#{user_type});
+	</insert>
+
+
+
+</mapper>

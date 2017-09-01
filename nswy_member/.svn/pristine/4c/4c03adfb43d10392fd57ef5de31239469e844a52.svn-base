@@ -1,0 +1,17 @@
+package com.ovit.bee.IDao;
+
+import java.util.List;
+
+import com.ovit.bee.pojo.ColumnSettings;
+
+public interface ColumnSettingsMapper {
+    int deleteByPrimaryKey(Integer id);
+
+    int insert(List<ColumnSettings> record);
+
+
+    ColumnSettings selectByPrimaryKey(Integer id);
+
+
+    int updateByPrimaryKey(ColumnSettings record);
+}

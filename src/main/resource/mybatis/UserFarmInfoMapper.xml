@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ovit.bee.IDao.UserFarmInfoMapper" >
+  <resultMap id="BaseResultMap" type="com.ovit.bee.pojo.UserFarmInfo" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="account" property="account" jdbcType="VARCHAR" />
+    <result column="farmlan" property="farmlan" jdbcType="LONGVARCHAR" />
+    <result column="species" property="species" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, account, farmlan, species
+  </sql>
+  <select id="findUserFarmInfo" resultMap="BaseResultMap" parameterType="com.ovit.bee.pojo.UserFarmInfo" >
+    select 
+    <include refid="Base_Column_List" />
+    from user_farm_info
+    where account = #{account,jdbcType=VARCHAR}
+  </select>
+  
+  <insert id="insert" parameterType="com.ovit.bee.pojo.UserFarmInfo" >
+    insert into user_farm_info (id, account, farmlan, 
+      species)
+    values (#{id,jdbcType=INTEGER}, #{account,jdbcType=VARCHAR}, #{farmlan,jdbcType=LONGVARCHAR}, 
+      #{species,jdbcType=VARCHAR})
+  </insert>
+  
+  <update id="updateUserFarmInfo" parameterType="com.ovit.bee.pojo.UserFarmInfo" >
+    update user_farm_info
+    <set >
+      <if test="farmlan != null" >
+        farmlan = #{farmlan,jdbcType=LONGVARCHAR},
+      </if>
+      <if test="species != null" >
+        species = #{species,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where account = #{account,jdbcType=VARCHAR}
+  </update>
+  
+</mapper>

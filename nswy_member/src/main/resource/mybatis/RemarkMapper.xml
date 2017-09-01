@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="RemarkMapper" >
+  
+  <sql id="Base_Column_List">
+    id,account,data, create_time
+  </sql>
+  <select id="selectByAccount" resultType="hashmap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from bookmark
+    where account = #{account,jdbcType=VARCHAR}
+  </select>
+  <insert id="insert" parameterType="java.util.Map">
+    replace into bookmark (id,account,data,create_time)
+    values (#{id,jdbcType=INTEGER}, #{account,jdbcType=VARCHAR}, 
+      #{data,jdbcType=LONGVARCHAR},now()
+      )
+  </insert>
+</mapper>

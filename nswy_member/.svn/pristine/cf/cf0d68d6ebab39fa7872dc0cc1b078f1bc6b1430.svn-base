@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ovit.bee.IDao.SpeciesMapper" >
+  <resultMap id="BaseResultMap" type="com.ovit.bee.pojo.Species" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="account" property="account" jdbcType="VARCHAR" />
+    <result column="species_name" property="speciesName" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="INTEGER" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, account, species_name, type, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from favorite_species
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from favorite_species
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="java.util.List" >
+  <![CDATA[
+		replace into favorite_species (id, account, species_name, 
+      type, create_time) values
+		]]>
+		<foreach collection="list" item="item" index="index"
+			separator=",">
+			(#{item.id},#{item.account},#{item.speciesName},#{item.type},#{item.createTime})
+		</foreach>
+  </insert>
+ 
+  <update id="updateByPrimaryKey" parameterType="com.ovit.bee.pojo.Species" >
+    update favorite_species
+    set account = #{account,jdbcType=VARCHAR},
+      species_name = #{speciesName,jdbcType=VARCHAR},
+      type = #{type,jdbcType=INTEGER},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

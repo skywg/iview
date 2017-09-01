@@ -1,0 +1,9 @@
+package com.ovit.bee.service;
+
+import java.util.List;
+
+import com.ovit.bee.pojo.ColumnSettings;
+
+public interface ColumnSettingService {
+	 int insert(List<ColumnSettings> record);
+}

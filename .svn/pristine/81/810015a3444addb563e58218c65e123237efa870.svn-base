@@ -1,0 +1,226 @@
+package com.ovit.bee.web;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.github.pagehelper.PageInfo;
+import com.ovit.bee.pojo.Knowledge;
+import com.ovit.bee.pojo.KnowledgeComment;
+import com.ovit.bee.pojo.KnowledgeDetail;
+import com.ovit.bee.pojo.LoginUser;
+import com.ovit.bee.service.KnowLedgeService;
+
+@RestController
+@EnableAutoConfiguration
+@RequestMapping("/knowLege")
+public class KnowLedgeController {
+	
+	@Autowired
+	private KnowLedgeService knowLedgeService;
+	
+	/**
+	 * 资讯查询（分页）
+	 * @param page
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/findKnowLedge/{page}", method = RequestMethod.GET)
+	@ResponseBody
+	public Map<String,Object> findKnowLedge(@PathVariable String page,HttpServletRequest request) throws Exception{
+		Map<String,Object> map = new HashMap<String, Object>();
+		int currentPage = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(page);
+		int pageSize  = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(request.getParameter("pageSize"));
+		PageInfo<Knowledge> lists = knowLedgeService.findKnowLedge(currentPage, pageSize);
+		List<Knowledge> list = lists.getList();
+		for(Knowledge info:list){
+			long newTime = (new Date().getTime())-(info.getCreateTime().getTime());
+			long minutes = newTime/(1000* 60); 
+			long createTime=0; 
+			if(minutes<60){
+				createTime=minutes;
+				info.setDay(String.valueOf(createTime)+"分钟");
+			}else{
+				createTime=minutes/60;
+				if((minutes/60)<24){
+					info.setDay(String.valueOf(createTime)+"小时");
+				}else{
+					createTime= createTime/24;
+					info.setDay(String.valueOf(createTime)+"天");
+				}
+			}
+		}
+		lists.setList(list);
+		map.put("list", lists);
+		return map;
+	}
+	
+	/**
+	 * 根据ID查询详细信息
+	 * @param id
+	 */
+	@RequestMapping(value = "/findKnowLedgeDetail", method = RequestMethod.GET)
+	@ResponseBody
+	public KnowledgeDetail findKnowLedgeDetail(HttpServletRequest request){
+		String id  = request.getParameter("id");
+		if(!StringUtils.isEmpty(id)){
+			KnowledgeDetail knowledgeDetail= knowLedgeService.findKnowLedgeDetail(id);
+			return knowledgeDetail;
+		}
+		return null;
+	}
+	
+	/**
+	 * 搜索查询分页
+	 * @param page
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/findKnowLedgeTitle/{page}", method = RequestMethod.GET)
+	@ResponseBody
+	public Map<String,Object> findKnowLedgeTitle(@PathVariable String page,HttpServletRequest request) throws Exception{
+		String title  = request.getParameter("title");
+		Map<String,Object> map = new HashMap<String, Object>();
+		int currentPage = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(page);
+		int pageSize  = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(request.getParameter("pageSize"));
+		PageInfo<Knowledge> lists = knowLedgeService.findKnowLedgeTitle(currentPage, pageSize,title);
+		List<Knowledge> list = lists.getList();
+		for(Knowledge info:list){
+			long newTime = (new Date().getTime())-(info.getCreateTime().getTime());
+			long minutes = newTime/(1000* 60); 
+			long createTime=0; 
+			if(minutes<60){
+				createTime=minutes;
+				info.setDay(String.valueOf(createTime)+"分钟");
+			}else{
+				createTime=minutes/60;
+				if((minutes/60)<24){
+					info.setDay(String.valueOf(createTime)+"小时");
+				}else{
+					createTime= createTime/24;
+					info.setDay(String.valueOf(createTime)+"天");
+				}
+			}
+		}
+		lists.setList(list);
+		map.put("list", lists);
+		map.put("title", title);
+		return map;
+	}
+	
+	@RequestMapping(value="/findKnowLedgeComment/{page}" , method = RequestMethod.GET)
+	@ResponseBody
+	public Object findKnowLedgeComment(@PathVariable String page,HttpServletRequest request){
+		Integer id = Integer.valueOf(request.getParameter("id")); 
+		Map<String,Object> map = new HashMap<String, Object>();
+		if(!StringUtils.isEmpty(id)){
+			int currentPage = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(page);
+			int pageSize  = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(request.getParameter("pageSize"));
+			PageInfo<KnowledgeComment> list = knowLedgeService.findKnowledgeComment(currentPage, pageSize, id);
+			Integer tote  = knowLedgeService.findKnowledgeCommentCount(id);
+			map.put("list", list);
+			map.put("tote", tote);
+			return map;
+		}
+		return null;
+	}
+	
+	@RequestMapping(value="/findMyComment/{page}" , method = RequestMethod.GET)
+	@ResponseBody
+	public Object findMyComment(@PathVariable String page,HttpServletRequest request){
+		Integer id = Integer.valueOf(request.getParameter("id"));
+		LoginUser loginUser = (LoginUser) request.getSession().getAttribute("currentUser");
+		if(loginUser==null){
+			return null;
+		}
+		KnowledgeComment report = new KnowledgeComment();
+		report.setUserAccount(loginUser.getLoginAccount());
+		report.setInformationDetailId(id);
+		Map<String,Object> map = new HashMap<String, Object>();
+		if(!StringUtils.isEmpty(id)){
+			int currentPage = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(page);
+			int pageSize  = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(request.getParameter("pageSize"));
+			List<KnowledgeComment> list = knowLedgeService.findMyComment(currentPage, pageSize, report);
+			map.put("myComment", list);
+			return map;
+		}
+		return null;
+	}
+	
+	/**
+	 * 点赞
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/saveZan", method = RequestMethod.GET)
+	@ResponseBody
+	public Object saveZan(HttpServletRequest request){
+		Map<String, String> map = new HashMap<String, String>();
+		KnowledgeComment report = new KnowledgeComment();
+		Integer id = Integer.valueOf(request.getParameter("id").toString());
+		report.setId(id);
+		try {
+			KnowledgeComment knowledgeComment  = knowLedgeService.update(report);
+			map.put("flag", "1");
+			map.put("thumbUpNum",knowledgeComment.getThumbUpNum().toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return map;
+	}
+	
+	/**
+	 * 回复
+	 * @param params
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/saveHuiFu", method = RequestMethod.POST)
+	@ResponseBody
+	public Object saveHuiFu(@RequestBody Map<String, Object> params,HttpServletRequest request){
+		Map<String, String> map = new HashMap<String, String>();
+		LoginUser loginUser = (LoginUser) request.getSession().getAttribute("currentUser");
+		KnowledgeComment report = new KnowledgeComment();
+		report.setPostId(Integer.valueOf(params.get("postId").toString()));
+		report.setInformationDetailId(Integer.valueOf(params.get("informationDetailId").toString()));
+		report.setContent(params.get("content").toString());
+		report.setUserAccount(loginUser.getLoginAccount());
+		report.setUserName(loginUser.getDisplayName());
+		report.setThumbUpNum(0);
+		try {
+			knowLedgeService.insert(report);
+			map.put("flag", "1");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return map;
+	}
+	
+	@RequestMapping(value = "/upvote", method = RequestMethod.GET)
+	@ResponseBody
+	public Object upvote(HttpServletRequest request){
+		Map<String, String> map = new HashMap<String, String>();
+		Integer id = Integer.valueOf(request.getParameter("id").toString());
+		try {
+			KnowledgeDetail knowledgeDetail  = knowLedgeService.upvote(id);
+			map.put("flag", "1");
+			map.put("number",knowledgeDetail.getThumbUpNum().toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return map;
+	}
+}

@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ovit.bee.IDao.GovInfoMapper">
+  <resultMap id="BaseResultMap" type="com.ovit.bee.pojo.GovInfo">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="gov_name" jdbcType="VARCHAR" property="govName" />
+    <result column="gov_code" jdbcType="VARCHAR" property="govCode" />
+    <result column="login_account" jdbcType="VARCHAR" property="loginAccount" />
+    <result column="qr_code_url" jdbcType="VARCHAR" property="qrCodeUrl" />
+    <result column="organization_code" jdbcType="VARCHAR" property="organizationCode" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="legal_person_certificate_url" jdbcType="VARCHAR" property="legalPersonCertificateUrl" />
+    <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="legal_person" jdbcType="VARCHAR" property="legalPerson" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, gov_name, gov_code, login_account, qr_code_url, organization_code, create_time, 
+    legal_person_certificate_url, address,legal_person
+  </sql>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from gov_info
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+   <select id="findAll"  resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from gov_info
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from gov_info
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.ovit.bee.pojo.GovInfo">
+    insert into gov_info (id, gov_name, gov_code, 
+      login_account, qr_code_url, organization_code, 
+      create_time, legal_person_certificate_url,address,legal_person
+      )
+    values (#{id,jdbcType=INTEGER}, #{govName,jdbcType=VARCHAR}, #{govCode,jdbcType=VARCHAR}, 
+      #{loginAccount,jdbcType=VARCHAR}, #{qrCodeUrl,jdbcType=VARCHAR}, #{organizationCode,jdbcType=VARCHAR}, 
+     now(), #{legalPersonCertificateUrl,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR},#{legalPerson,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.ovit.bee.pojo.GovInfo">
+    insert into gov_info
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        id,
+      </if>
+      <if test="govName != null">
+        gov_name,
+      </if>
+      <if test="govCode != null">
+        gov_code,
+      </if>
+      <if test="loginAccount != null">
+        login_account,
+      </if>
+      <if test="qrCodeUrl != null">
+        qr_code_url,
+      </if>
+      <if test="organizationCode != null">
+        organization_code,
+      </if>
+      <if test="createTime != null">
+        create_time,
+      </if>
+      <if test="legalPersonCertificateUrl != null">
+        legal_person_certificate_url,
+      </if>
+       <if test="address != null">
+        address,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="govName != null">
+        #{govName,jdbcType=VARCHAR},
+      </if>
+      <if test="govCode != null">
+        #{govCode,jdbcType=VARCHAR},
+      </if>
+      <if test="loginAccount != null">
+        #{loginAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="qrCodeUrl != null">
+        #{qrCodeUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="organizationCode != null">
+        #{organizationCode,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+       now(),
+      </if>
+      <if test="legalPersonCertificateUrl != null">
+        #{legalPersonCertificateUrl,jdbcType=VARCHAR},
+      </if>
+       <if test="address != null">
+        #{address,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ovit.bee.pojo.GovInfo">
+    update gov_info
+    <set>
+      <if test="govName != null">
+        gov_name = #{govName,jdbcType=VARCHAR},
+      </if>
+      <if test="govCode != null">
+        gov_code = #{govCode,jdbcType=VARCHAR},
+      </if>
+      <if test="loginAccount != null">
+        login_account = #{loginAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="qrCodeUrl != null">
+        qr_code_url = #{qrCodeUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="organizationCode != null">
+        organization_code = #{organizationCode,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        create_time =now(),
+      </if>
+      <if test="legalPersonCertificateUrl != null">
+        legal_person_certificate_url = #{legalPersonCertificateUrl,jdbcType=VARCHAR},
+      </if>
+       <if test="address != null">
+        #{address,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ovit.bee.pojo.GovInfo">
+    update gov_info
+    set gov_name = #{govName,jdbcType=VARCHAR},
+      gov_code = #{govCode,jdbcType=VARCHAR},
+      login_account = #{loginAccount,jdbcType=VARCHAR},
+      qr_code_url = #{qrCodeUrl,jdbcType=VARCHAR},
+      organization_code = #{organizationCode,jdbcType=VARCHAR},
+      create_time =now(),
+      legal_person_certificate_url = #{legalPersonCertificateUrl,jdbcType=VARCHAR},
+      address = #{address,jdbcType=VARCHAR},
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

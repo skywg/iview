@@ -1,0 +1,118 @@
+package com.ovit.bee.web;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.ovit.bee.pojo.ColumnSettings;
+import com.ovit.bee.pojo.InForMationDetail;
+import com.ovit.bee.pojo.KnowledgeDetail;
+import com.ovit.bee.pojo.LoginUser;
+import com.ovit.bee.pojo.PolicyDetail;
+import com.ovit.bee.service.ColumnSettingService;
+
+@RestController
+@EnableAutoConfiguration
+@RequestMapping("/columnSettings")
+public class ColumnSettingController {
+	@Autowired
+	private ColumnSettingService service;
+	@ResponseBody
+	@RequestMapping(value = "/insert", method = RequestMethod.POST)
+	public int  insert(@RequestBody Map<String, Object> params,HttpServletRequest request){
+		HttpSession session = request.getSession();
+		LoginUser loginUser = (LoginUser) session.getAttribute("currentUser");
+		List<ColumnSettings> list = new ArrayList<>();
+		String username = loginUser.getLoginAccount();
+		List<HashMap<String, String>> object = (ArrayList) params.get("base");
+		int num = 0;
+		if (object.size() != 0) {
+			for (int i = 0; i < object.size(); i++) {
+				Map<String, String> map = object.get(i);
+				ColumnSettings columnSettings = new ColumnSettings();
+				columnSettings.setColumnId(map.get("owner"));
+				columnSettings.setColumnName(map.get("name"));
+				columnSettings.setSecurity(Integer.parseInt(map.get("authority")));
+				columnSettings.setOrder(i + 1);
+				columnSettings.setLastUpdateTime(new Date());
+				columnSettings.setUserAccount(username);
+				list.add(columnSettings);
+			}
+			num = service.insert(list);
+		}
+		return num;
+	}
+	
+
+	@RequestMapping(value = "/findColumnSetting/{page}", method = RequestMethod.GET)
+	@ResponseBody
+	public Object findColumnSetting(@PathVariable String page,HttpServletRequest request){
+		int currentPage = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(page);
+		int pageSize  = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(request.getParameter("pageSize"));
+		HttpSession session = request.getSession();
+		Map<String, Object> map = new HashMap<String, Object>();
+		LoginUser loginUser = (LoginUser) session.getAttribute("currentUser");
+		ColumnSettings column = new ColumnSettings();
+		column.setUserAccount(loginUser.getLoginAccount());
+		List<ColumnSettings>  list  = service.findColumnSetting(column);
+		map.put("list", list);
+		return map;
+	}
+	
+	@RequestMapping(value = "/findColumnLabel", method = RequestMethod.GET)
+	@ResponseBody
+	public Object findColumnLabel(HttpServletRequest request){
+		String columnName  = request.getParameter("columnName");
+		HttpSession session = request.getSession();
+		Map<String, Object> map = new HashMap<String, Object>();
+		LoginUser loginUser = (LoginUser) session.getAttribute("currentUser");
+		ColumnSettings column = new ColumnSettings();
+		column.setUserAccount(loginUser.getLoginAccount());
+		column.setColumnName(columnName);
+		List<ColumnSettings>  list  = service.findColumnSet(column);
+		map.put("list", list);
+		return map;
+	}
+	
+	@RequestMapping(value = "/findColumnList", method = RequestMethod.GET)
+	@ResponseBody
+	public Object findColumnList(HttpServletRequest request){
+		String label  = request.getParameter("label");
+		String columnId  = request.getParameter("columnId");
+		Map<String, Object> map = new HashMap<String, Object>();
+		if(columnId.equals("资讯")){
+			InForMationDetail info = new InForMationDetail();
+			info.setLabel(label);
+			List<InForMationDetail> list = service.findColumnInforMation(info);
+			map.put("list", list);
+		}else if(columnId.equals("政策")){
+			PolicyDetail policyDetail = new PolicyDetail();
+			policyDetail.setLabel(label);
+			List<PolicyDetail>  list = service.findColumnPolicy(policyDetail);
+			map.put("list", list);
+		}else if(columnId.equals("知识")){
+			KnowledgeDetail knowledgeDetail = new KnowledgeDetail();
+			knowledgeDetail.setLabel(label);
+			List<KnowledgeDetail> list  = service.findColumnKonwLedge(knowledgeDetail);
+			map.put("list", list);
+		}
+		return map;
+		
+	}
+}

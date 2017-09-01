@@ -1,0 +1,184 @@
+package com.ovit.bee.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.ovit.bee.IDao.KnowledgeCommentMapper;
+import com.ovit.bee.IDao.KnowledgeDetailMapper;
+import com.ovit.bee.IDao.KnowledgeMapper;
+import com.ovit.bee.pojo.Knowledge;
+import com.ovit.bee.pojo.KnowledgeComment;
+import com.ovit.bee.pojo.KnowledgeDetail;
+import com.ovit.bee.service.KnowLedgeService;
+
+@Service
+public class KnowLedgeServiceImpl implements KnowLedgeService {
+	
+	@Autowired
+	private KnowledgeMapper knowledgeMapper;
+	
+	@Autowired
+	private KnowledgeDetailMapper knowledgeDetailMapper;
+	
+	@Autowired
+	private KnowledgeCommentMapper knowledgeCommentMapper;
+	
+	@Override
+	public  PageInfo<Knowledge> findKnowLedge(int pageNum, int pageSize){
+		PageHelper.startPage(pageNum, pageSize);
+		List<Knowledge> list = knowledgeMapper.findKnowLedge();
+		return new PageInfo<Knowledge>(list);
+
+	}
+	
+	@Override
+	public KnowledgeDetail findKnowLedgeDetail(String id ){
+		KnowledgeDetail knowledgeDetail  = knowledgeDetailMapper.selectByPrimaryKey(Integer.valueOf(id));
+		return knowledgeDetail;
+	}
+	
+	@Override
+	public  PageInfo<Knowledge> findKnowLedgeTitle(int pageNum, int pageSize,String title){
+		PageHelper.startPage(pageNum, pageSize);
+		Knowledge know = new Knowledge();
+		know.setTitle(title);
+		List<Knowledge> list = knowledgeMapper.findKnowLedgeTitle(know);
+		return new PageInfo<Knowledge>(list);
+
+	}
+	
+	@Override
+	public PageInfo<KnowledgeComment> findKnowledgeComment(int pageNum, int pageSize,Integer id){
+		PageHelper.startPage(pageNum, pageSize);
+		KnowledgeComment info = new KnowledgeComment();
+		info.setInformationDetailId(id);
+		List<KnowledgeComment> policyComment = knowledgeCommentMapper.findKnowledgeComment(info);
+		TreeUtil util = new TreeUtil(policyComment);
+		List<KnowledgeComment> lists = util.createTreeList();
+		return new PageInfo<KnowledgeComment>(lists);
+	}
+	
+	class TreeUtil {
+		private List<KnowledgeComment> treeNodeList = new ArrayList<KnowledgeComment>();
+
+		public TreeUtil(List<KnowledgeComment> list) {
+			for (KnowledgeComment comment : list) {
+				if (null == comment.getPostId()) {
+					comment.setPostId(0);
+				}
+				treeNodeList.add(comment);
+			}
+		}
+
+		public List<KnowledgeComment> createTreeList() {
+			KnowledgeComment root = generateTreeNode(0);
+			return root.getList();
+		}
+
+		/**
+		 * 
+		 * @param nodeId
+		 * @return
+		 */
+		private KnowledgeComment getNodeById(int nodeId) {
+			KnowledgeComment treeNode = new KnowledgeComment();
+			for (KnowledgeComment item : treeNodeList) {
+				if (item.getId() == nodeId) {
+					treeNode = item;
+					break;
+				}
+			}
+			return treeNode;
+		}
+
+		/**
+		 * 
+		 * @param nodeId
+		 * @return
+		 */
+		private List<KnowledgeComment> getChildrenNodeById(int nodeId) {
+			List<KnowledgeComment> childrenTreeNode = new ArrayList<KnowledgeComment>();
+			for (KnowledgeComment item : treeNodeList) {
+				if (item.getPostId().intValue() == nodeId) {
+					childrenTreeNode.add(item);
+				}
+			}
+			return childrenTreeNode;
+		}
+
+		/**
+		 * 递归生成Tree结构数据
+		 * 
+		 * @param rootId
+		 * @return
+		 */
+		private KnowledgeComment generateTreeNode(int rootId) {
+			KnowledgeComment root = this.getNodeById(rootId);
+			List<KnowledgeComment> childrenTreeNode = this
+					.getChildrenNodeById(rootId);
+			for (KnowledgeComment item : childrenTreeNode) {
+				KnowledgeComment node = this.generateTreeNode(item.getId());
+				if (null == root.getList()) {
+					List<KnowledgeComment> children = new ArrayList<KnowledgeComment>();
+					root.setList(children);
+				}
+				root.getList().add(node);
+			}
+			return root;
+		}
+	}
+	
+	
+	@Override
+	public Integer findKnowledgeCommentCount(Integer id){
+		KnowledgeComment info = new KnowledgeComment();
+		info.setInformationDetailId(id);
+		List<KnowledgeComment> policyComment = knowledgeCommentMapper.findKnowledgeComment(info);
+		
+		return policyComment.size();
+	}
+	
+	@Override
+	public List<KnowledgeComment> findMyComment(int pageNum, int pageSize,KnowledgeComment info){
+		PageHelper.startPage(pageNum, pageSize);
+		List<KnowledgeComment> policyComment = knowledgeCommentMapper.findMyComment(info);
+		TreeUtil util = new TreeUtil(policyComment);
+		List<KnowledgeComment> lists = util.createTreeList();
+		return lists;
+	}
+	
+	@Override
+	public KnowledgeComment update(KnowledgeComment info){
+		List<KnowledgeComment> policyComment = knowledgeCommentMapper.findKnowledgeCommentId(info);
+		if(policyComment.size()>0){
+			KnowledgeComment record  = policyComment.get(0);
+			record.setThumbUpNum(record.getThumbUpNum()+1);
+			knowledgeCommentMapper.updateThumbUpNum(record);
+			return record;
+		}
+		return null;
+	}
+	
+	
+	@Override
+	public void insert(KnowledgeComment info){
+		
+		knowledgeCommentMapper.insert(info);
+	}
+	
+	@Override
+	public KnowledgeDetail upvote(Integer id){
+		KnowledgeDetail infor  = knowledgeDetailMapper.selectByPrimaryKey(id);
+		if(infor!=null){
+			infor.setThumbUpNum(infor.getThumbUpNum()+1);
+			knowledgeDetailMapper.updateThumbUpNum(infor);
+			return infor;
+		}
+		return null;
+	}
+}

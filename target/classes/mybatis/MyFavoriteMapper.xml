@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ovit.bee.IDao.MyFavoriteMapper" >
+  <resultMap id="BaseResultMap" type="com.ovit.bee.pojo.MyFavorite" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="account" property="account" jdbcType="VARCHAR" />
+    <result column="path" property="path" jdbcType="VARCHAR" />
+    <result column="type" property="type" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  	<result column="title" property="title" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, account, path, type, create_time,title
+  </sql>
+  <select id="findCollect" resultMap="BaseResultMap" parameterType="com.ovit.bee.pojo.MyFavorite" >
+    select 
+    <include refid="Base_Column_List" />
+    from myfavorite where 1=1
+    <if test="account != null">
+    	and account = #{account,jdbcType=VARCHAR}
+    </if>
+    <if test="path != null">
+    	and path = #{path,jdbcType=VARCHAR}
+    </if>
+   
+  </select>
+  
+  <select id="findMyMessage" resultType="java.lang.Integer" parameterType="java.lang.String" >
+    select 
+    	COUNT(*) AS favorite
+    from myfavorite f
+    where f.account = #{userId,jdbcType=VARCHAR}
+  </select>
+  
+  <insert id="insert" parameterType="com.ovit.bee.pojo.MyFavorite" >
+    insert into myfavorite (id, account, path, 
+      type, create_time,title)
+    values (#{id,jdbcType=INTEGER}, #{account,jdbcType=VARCHAR}, #{path,jdbcType=VARCHAR}, 
+      #{type,jdbcType=VARCHAR},now(),#{title,jdbcType=VARCHAR})
+  </insert>
+ 
+</mapper>

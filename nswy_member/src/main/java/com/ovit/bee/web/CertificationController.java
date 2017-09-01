@@ -1,0 +1,71 @@
+package com.ovit.bee.web;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.ovit.bee.pojo.Certification;
+import com.ovit.bee.pojo.LoginUser;
+import com.ovit.bee.service.CertificationService;
+
+@Controller
+@RequestMapping("/Certification")
+public class CertificationController {
+	@Autowired
+	private CertificationService certificationService;
+	
+	@ResponseBody
+	@RequestMapping(value = "/insert", method = RequestMethod.POST)
+	public Integer insert(@RequestBody Map<String, Object> params,HttpServletRequest request)  {
+		String name = (String) params.get("name");
+		String idcard = (String) params.get("idcard");
+		String phone = (String) params.get("phone");
+		List<String> city = (ArrayList) params.get("city");
+		Certification cer = new Certification();
+		int num = 0;
+		try {
+			LoginUser loginUser = (LoginUser) request.getSession().getAttribute("currentUser");
+			String account = loginUser.getLoginAccount();
+			if (account != null) {
+				Certification cer1 = certificationService.selectByAccount(account);
+				if (cer1 != null) {
+					if (city.size()!=0) {
+						cer1.setCity((city.get(0) + "/" + city.get(1)));
+					}else{
+						cer1.setCity(null);
+					}
+					cer1.setIdCard(idcard);
+					cer1.setMobile(phone);
+					cer1.setCreateTime(new Date());
+					cer1.setRealname(name);
+					num = certificationService.insert(cer1);
+				} else {
+					if (city.size()!=0) {
+						cer.setCity((city.get(0) + "/" + city.get(1)));
+					}else{
+						cer.setCity(null);
+					}
+					cer.setIdCard(idcard);
+					cer.setMobile(phone);
+					cer.setCreateTime(new Date());
+					cer.setRealname(name);
+					cer.setUserAccount(account);
+					num = certificationService.insert(cer);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return num;
+	}
+}

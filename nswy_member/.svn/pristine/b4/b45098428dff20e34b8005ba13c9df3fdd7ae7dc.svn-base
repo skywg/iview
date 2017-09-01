@@ -1,0 +1,184 @@
+package com.ovit.bee.service.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.ovit.bee.IDao.InForMationDetailMapper;
+import com.ovit.bee.IDao.InForMationMapper;
+import com.ovit.bee.IDao.InfoCommentMapper;
+import com.ovit.bee.pojo.InForMation;
+import com.ovit.bee.pojo.InForMationDetail;
+import com.ovit.bee.pojo.InfoComment;
+import com.ovit.bee.service.InForMationService;
+
+@Service(value="inForMationService")
+public class InForMationServiceImpl implements InForMationService {
+	
+	@Autowired
+	private InForMationMapper inForMationMapper;
+	
+	@Autowired
+	private InForMationDetailMapper inForMationDetailMapper;
+	
+	@Autowired
+	private InfoCommentMapper infoCommentMapper;
+	
+	@Override
+	public  PageInfo<InForMation> findInForMation(int pageNum, int pageSize){
+		PageHelper.startPage(pageNum, pageSize);
+		List<InForMation> list = inForMationMapper.findInForMation();
+		return new PageInfo<InForMation>(list);
+	}
+	
+	@Override
+	public InForMationDetail findInForMationDetail(String id ){
+		InForMationDetail infor  = inForMationDetailMapper.selectByPrimaryKey(Integer.valueOf(id));
+		return infor;
+	}
+	
+	@Override
+	public  PageInfo<InForMation> findInforMationTitle(int pageNum, int pageSize,String title){
+		PageHelper.startPage(pageNum, pageSize);
+		InForMation info = new InForMation();
+		info.setTitle(title);
+		List<InForMation> list = inForMationMapper.findInforMationTitle(info);
+		return new PageInfo<InForMation>(list);
+	}
+	
+	@Override
+	public PageInfo<InfoComment> findInfoComment(int pageNum, int pageSize,Integer informationDetailId){
+		PageHelper.startPage(pageNum, pageSize);
+		InfoComment info = new InfoComment();
+		info.setInformationDetailId(informationDetailId);
+		List<InfoComment> infoComment = infoCommentMapper.findInfoComment(info);
+		TreeUtil util = new TreeUtil(infoComment);
+		List<InfoComment> lists = util.createTreeList();
+		return new PageInfo<InfoComment>(lists);
+	}
+	
+	class TreeUtil {
+		private List<InfoComment> treeNodeList = new ArrayList<InfoComment>();
+
+		public TreeUtil(List<InfoComment> list) {
+			for (InfoComment comment : list) {
+				if (null == comment.getPostId()) {
+					comment.setPostId(0);
+				}
+				treeNodeList.add(comment);
+			}
+		}
+
+		public List<InfoComment> createTreeList() {
+			InfoComment root = generateTreeNode(0);
+			return root.getList();
+		}
+
+		/**
+		 * 
+		 * @param nodeId
+		 * @return
+		 */
+		private InfoComment getNodeById(int nodeId) {
+			InfoComment treeNode = new InfoComment();
+			for (InfoComment item : treeNodeList) {
+				if (item.getId() == nodeId) {
+					treeNode = item;
+					break;
+				}
+			}
+			return treeNode;
+		}
+
+		/**
+		 * 
+		 * @param nodeId
+		 * @return
+		 */
+		private List<InfoComment> getChildrenNodeById(int nodeId) {
+			List<InfoComment> childrenTreeNode = new ArrayList<InfoComment>();
+			for (InfoComment item : treeNodeList) {
+				if (item.getPostId().intValue() == nodeId) {
+					childrenTreeNode.add(item);
+				}
+			}
+			return childrenTreeNode;
+		}
+
+		/**
+		 * 递归生成Tree结构数据
+		 * 
+		 * @param rootId
+		 * @return
+		 */
+		private InfoComment generateTreeNode(int rootId) {
+			InfoComment root = this.getNodeById(rootId);
+			List<InfoComment> childrenTreeNode = this 
+					.getChildrenNodeById(rootId);
+			for (InfoComment item : childrenTreeNode) {
+				InfoComment node = this.generateTreeNode(item.getId());
+				if (null == root.getList()) {
+					List<InfoComment> children = new ArrayList<InfoComment>();
+					root.setList(children);
+				}
+				root.getList().add(node);
+			}
+			return root;
+		}
+	}
+	
+	@Override
+	public InfoComment update(InfoComment info){
+		List<InfoComment> infoComment = infoCommentMapper.findInfoCommentId(info);
+		if(infoComment.size()>0){
+			InfoComment record  = infoComment.get(0);
+			record.setThumbUpNum(record.getThumbUpNum()+1);
+			infoCommentMapper.updateThumbUpNum(record);
+			return record;
+		}
+		return null;
+	}
+	
+	@Override
+	public void insert(InfoComment info){
+		infoCommentMapper.insert(info);
+	}
+	
+	@Override
+	public Integer findInfoCommentCount(Integer informationDetailId){
+		InfoComment info = new InfoComment();
+		info.setInformationDetailId(informationDetailId);
+		List<InfoComment> infoComment = infoCommentMapper.findInfoComment(info);
+		return infoComment.size();
+	}
+	
+	@Override
+	public List<InfoComment> findMyComment(int pageNum, int pageSize,InfoComment info){
+		PageHelper.startPage(pageNum, pageSize);
+		List<InfoComment> infoComment = infoCommentMapper.findMyComment(info);
+		TreeUtil util = new TreeUtil(infoComment);
+		List<InfoComment> lists = util.createTreeList();
+		return lists;
+	}
+	
+	@Override
+	public InForMationDetail upvote(Integer id){
+		InForMationDetail infor  = inForMationDetailMapper.selectByPrimaryKey(id);
+		if(infor!=null){
+			infor.setThumbUpNum(infor.getThumbUpNum()+1);
+			inForMationDetailMapper.updateThumbUpNum(infor);
+			return infor;
+		}
+		return null;
+	}
+
+	@Override
+	public void updateBrowse(Map<String, Object> map) {
+		inForMationDetailMapper.updateBrowse(map);
+	}
+}

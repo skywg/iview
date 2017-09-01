@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ovit.bee.IDao.UserWorkExperienceMapper" >
+  <resultMap id="BaseResultMap" type="com.ovit.bee.pojo.UserWorkExperience" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="account" property="account" jdbcType="VARCHAR" />
+    <result column="organazation_name" property="organazationName" jdbcType="VARCHAR" />
+    <result column="start_date" property="startDate" jdbcType="DATE" />
+    <result column="end_date" property="endDate" jdbcType="DATE" />
+    <result column="content" property="content" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, account, organazation_name, start_date, end_date, content
+  </sql>
+  <select id="findUserWork" resultMap="BaseResultMap" parameterType="com.ovit.bee.pojo.UserWorkExperience" >
+    select 
+    <include refid="Base_Column_List" />
+    from user_work_experience
+    where account = #{account,jdbcType=VARCHAR}
+  </select>
+
+  <insert id="insert" parameterType="com.ovit.bee.pojo.UserWorkExperience" >
+    insert into user_work_experience (id, account, organazation_name, 
+      start_date, end_date, content
+      )
+    values (#{id,jdbcType=INTEGER}, #{account,jdbcType=VARCHAR}, #{organazationName,jdbcType=VARCHAR}, 
+      #{startDate,jdbcType=DATE}, #{endDate,jdbcType=DATE}, #{content,jdbcType=VARCHAR}
+      )
+  </insert>
+  
+  <update id="updateUserWork" parameterType="com.ovit.bee.pojo.UserWorkExperience" >
+    update user_work_experience
+    <set >
+      <if test="organazationName != null" >
+        organazation_name = #{organazationName,jdbcType=VARCHAR},
+      </if>
+      <if test="startDate != null" >
+        start_date = #{startDate,jdbcType=DATE},
+      </if>
+      <if test="endDate != null" >
+        end_date = #{endDate,jdbcType=DATE},
+      </if>
+      <if test="content != null" >
+        content = #{content,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where account = #{account,jdbcType=VARCHAR}
+  </update>
+  
+</mapper>

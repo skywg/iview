@@ -1,0 +1,228 @@
+package com.ovit.bee.web;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.github.pagehelper.PageInfo;
+import com.ovit.bee.pojo.InForMation;
+import com.ovit.bee.pojo.InForMationDetail;
+import com.ovit.bee.pojo.InfoComment;
+import com.ovit.bee.pojo.LoginUser;
+import com.ovit.bee.service.InForMationService;
+
+@RestController
+@EnableAutoConfiguration
+@RequestMapping("/inforMation")
+public class InForMationController {
+	
+	@Autowired
+	private InForMationService inForMationService;
+
+	/**
+	 * 资讯查询（分页）
+	 * @param page
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/findInforMation/{page}", method = RequestMethod.GET)
+	@ResponseBody
+	public Map<String,Object> findInforMation(@PathVariable String page,HttpServletRequest request) throws Exception{
+		Map<String,Object> map = new HashMap<String, Object>();
+		int currentPage = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(page);
+		int pageSize  = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(request.getParameter("pageSize"));
+		PageInfo<InForMation> lists = inForMationService.findInForMation(currentPage, pageSize);
+		List<InForMation> list = lists.getList();
+		for(InForMation info:list){
+			long newTime = (new Date().getTime())-(info.getCreateTime().getTime());
+			long minutes = newTime/(1000* 60); 
+			long createTime=0; 
+			if(minutes<60){
+				createTime=minutes;
+				info.setDay(String.valueOf(createTime)+"分钟");
+			}else{
+				createTime=minutes/60;
+				if((minutes/60)<24){
+					info.setDay(String.valueOf(createTime)+"小时");
+				}else{
+					createTime= createTime/24;
+					info.setDay(String.valueOf(createTime)+"天");
+					
+				}
+			}
+		}
+		lists.setList(list);
+		map.put("list", lists);
+		return map;
+	}
+	
+	/**
+	 * 根据ID查询详细信息
+	 * @param id
+	 */
+	@RequestMapping(value = "/findInforMationDetail", method = RequestMethod.GET)
+	@ResponseBody
+	public InForMationDetail findInforMationDetail(HttpServletRequest request){
+		String id  = request.getParameter("id");
+		if(!StringUtils.isEmpty(id)){
+			InForMationDetail inForMationDetail= inForMationService.findInForMationDetail(id);
+			return inForMationDetail;
+		}
+		return null;
+	}
+	
+	/**
+	 * 搜索查询分页
+	 * @param page
+	 * @return
+	 * @throws Exception
+	 */
+	@RequestMapping(value = "/findInforMationTitle/{page}", method = RequestMethod.GET)
+	@ResponseBody
+	public Map<String,Object> findInforMationTitle(@PathVariable String page,HttpServletRequest request) throws Exception{
+		String title  = request.getParameter("title");
+		Map<String,Object> map = new HashMap<String, Object>();
+		int currentPage = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(page);
+		int pageSize  = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(request.getParameter("pageSize"));
+		PageInfo<InForMation> lists = inForMationService.findInforMationTitle(currentPage, pageSize,title);
+		List<InForMation> list = lists.getList();
+		for(InForMation info:list){
+			long newTime = (new Date().getTime())-(info.getCreateTime().getTime());
+			long minutes = newTime/(1000* 60); 
+			long createTime=0; 
+			if(minutes<60){
+				createTime=minutes;
+				info.setDay(String.valueOf(createTime)+"分钟");
+			}else{
+				createTime=minutes/60;
+				if((minutes/60)<24){
+					info.setDay(String.valueOf(createTime)+"小时");
+				}else{
+					createTime= createTime/24;
+					info.setDay(String.valueOf(createTime)+"天");
+					
+				}
+			}
+		}
+		lists.setList(list);
+		map.put("list", lists);
+		map.put("title", title);
+		return map;
+	}
+	
+	@RequestMapping(value="/findInfoComment/{page}" , method = RequestMethod.GET)
+	@ResponseBody
+	public Object findInfoComment(@PathVariable String page,HttpServletRequest request){
+		Integer id = Integer.valueOf(request.getParameter("id")); 
+		Map<String,Object> map = new HashMap<String, Object>();
+		if(!StringUtils.isEmpty(id)){
+			int currentPage = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(page);
+			int pageSize  = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(request.getParameter("pageSize"));
+			PageInfo<InfoComment> list = inForMationService.findInfoComment(currentPage, pageSize, id);
+			Integer tote  = inForMationService.findInfoCommentCount(id);
+			map.put("list", list);
+			map.put("tote", tote);
+			return map;
+		}
+		return null;
+	}
+	
+	/**
+	 * 点赞
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/saveZan", method = RequestMethod.GET)
+	@ResponseBody
+	public Object saveZan(HttpServletRequest request){
+		Map<String, String> map = new HashMap<String, String>();
+		InfoComment report = new InfoComment();
+		Integer id = Integer.valueOf(request.getParameter("id").toString());
+		report.setId(id);
+		try {
+			InfoComment infoComment  = inForMationService.update(report);
+			map.put("flag", "1");
+			map.put("thumbUpNum",infoComment.getThumbUpNum().toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return map;
+	}
+	
+	/**
+	 * 回复
+	 * @param params
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping(value = "/saveHuiFu", method = RequestMethod.POST)
+	@ResponseBody
+	public Object saveHuiFu(@RequestBody Map<String, Object> params,HttpServletRequest request){
+		Map<String, String> map = new HashMap<String, String>();
+		LoginUser loginUser = (LoginUser) request.getSession().getAttribute("currentUser");
+		InfoComment report = new InfoComment();
+		report.setPostId(Integer.valueOf(params.get("postId").toString()));
+		report.setInformationDetailId(Integer.valueOf(params.get("informationDetailId").toString()));
+		report.setContent(params.get("content").toString());
+		report.setUserAccount(loginUser.getLoginAccount());
+		report.setUserName(loginUser.getDisplayName());
+		report.setThumbUpNum(0);
+		try {
+			inForMationService.insert(report);
+			map.put("flag", "1");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return map;
+	}
+	
+	@RequestMapping(value="/findMyComment/{page}" , method = RequestMethod.GET)
+	@ResponseBody
+	public Object findMyComment(@PathVariable String page,HttpServletRequest request){
+		Integer id = Integer.valueOf(request.getParameter("id"));
+		LoginUser loginUser = (LoginUser) request.getSession().getAttribute("currentUser");
+		if(null == loginUser){
+			return null;
+		}
+		InfoComment report = new InfoComment();
+		report.setUserAccount(loginUser.getLoginAccount());
+		report.setInformationDetailId(id);
+		Map<String,Object> map = new HashMap<String, Object>();
+		if(!StringUtils.isEmpty(id)){
+			int currentPage = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(page);
+			int pageSize  = StringUtils.isEmpty(page) ? 0 : Integer.parseInt(request.getParameter("pageSize"));
+			List<InfoComment> list = inForMationService.findMyComment(currentPage, pageSize, report);
+			map.put("myComment", list);
+			return map;
+		}
+		return null;
+	}
+	
+	@RequestMapping(value = "/upvote", method = RequestMethod.GET)
+	@ResponseBody
+	public Object upvote(HttpServletRequest request){
+		Map<String, String> map = new HashMap<String, String>();		
+		Integer id = Integer.valueOf(request.getParameter("id").toString());
+		try {
+			InForMationDetail infoComment  = inForMationService.upvote(id);
+			map.put("flag", "1");
+			map.put("number",infoComment.getThumbUpNum().toString());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return map;
+	}
+}

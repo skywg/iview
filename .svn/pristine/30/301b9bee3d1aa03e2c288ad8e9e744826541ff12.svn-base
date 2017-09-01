@@ -1,0 +1,21 @@
+package com.ovit.bee.service.impl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.ovit.bee.IDao.ColumnSettingsMapper;
+import com.ovit.bee.pojo.ColumnSettings;
+import com.ovit.bee.service.ColumnSettingService;
+@Service
+public class ColumnSettingServiceImpl implements ColumnSettingService{
+	@Autowired
+	private ColumnSettingsMapper ColumnSettingDao;
+	@Override
+	public int insert(List<ColumnSettings> record) {
+		
+		return ColumnSettingDao.insert(record);
+	}
+
+}

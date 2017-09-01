@@ -1,0 +1,12 @@
+package com.ovit.bee.IDao;
+
+import com.ovit.bee.pojo.KnowledgeDetail;
+
+public interface KnowledgeDetailMapper {
+   
+    int insert(KnowledgeDetail record);
+
+    KnowledgeDetail selectByPrimaryKey(Integer id);
+    
+    void updateThumbUpNum(KnowledgeDetail record);
+}

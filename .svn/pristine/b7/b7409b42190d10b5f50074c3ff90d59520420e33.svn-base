@@ -1,0 +1,32 @@
+package com.ovit.bee.service;
+
+import java.util.List;
+
+import com.github.pagehelper.PageInfo;
+import com.ovit.bee.pojo.Policy;
+import com.ovit.bee.pojo.PolicyComment;
+import com.ovit.bee.pojo.PolicyDetail;
+
+public interface PolicyService {
+
+	public PageInfo<Policy> findPolicy(int pageNum, int pageSize);
+
+	public PolicyDetail findPolicyDetail(String id);
+
+	public PageInfo<Policy> findPolicyTitle(int pageNum, String title, int pageSize);
+
+	public PageInfo<PolicyComment> findPolicyComment(int pageNum, int pageSize,
+			Integer informationDetailId);
+
+	public Integer findPolicyCommentCount(Integer id);
+
+	public List<PolicyComment> findMyComment(int pageNum, int pageSize,
+			PolicyComment info);
+
+	public PolicyComment update(PolicyComment info);
+
+	public void insert(PolicyComment info);
+
+	public PolicyDetail upvote(Integer id);
+
+}

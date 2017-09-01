@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ovit.bee.IDao.FriendGroupMapper" >
+  <resultMap id="BaseResultMap" type="com.ovit.bee.pojo.FriendGroup" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="login_account" property="loginAccount" jdbcType="VARCHAR" />
+    <result column="group_name" property="groupName" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, login_account, group_name
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from im_friend_group
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from im_friend_group
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="java.util.List" >
+    <![CDATA[insert into im_friend_group (id, login_account, group_name
+      ) values 
+      ]]>
+     
+    <foreach collection="list" item="item" index="index" separator=",">
+    (#{item.id}, #{item.loginAccount}, #{item.groupName}
+      )
+      </foreach>
+  </insert>
+  
+  
+  <update id="updateByPrimaryKey" parameterType="com.ovit.bee.pojo.FriendGroup" >
+    update im_friend_group
+    set login_account = #{loginAccount,jdbcType=VARCHAR},
+      group_name = #{groupName,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}hhr
+  </update>
+</mapper>

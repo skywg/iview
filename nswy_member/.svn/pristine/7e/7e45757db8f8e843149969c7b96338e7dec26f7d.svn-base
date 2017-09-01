@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ovit.bee.IDao.ColumnSettingsMapper" >
+  <resultMap id="BaseResultMap" type="com.ovit.bee.pojo.ColumnSettings" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="user_account" property="userAccount" jdbcType="VARCHAR" />
+    <result column="column_id" property="columnId" jdbcType="VARCHAR" />
+    <result column="column_name" property="columnName" jdbcType="VARCHAR" />
+    <result column="security" property="security" jdbcType="INTEGER" />
+    <result column="order" property="order" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="last_update_time" property="lastUpdateTime" jdbcType="TIMESTAMP" />
+    <result column="label" property="label" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, user_account, column_id, column_name, security, `order`, status, last_update_time,label
+  </sql>
+  <select id="findColumnSet" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from column_settings
+    where 1=1 and label IS NOT NULL  
+    <if test="userAccount!=null">
+     and user_account = #{userAccount,jdbcType=VARCHAR}
+    </if>
+    <if test="columnName!=null">
+     and column_name= #{columnName,jdbcType=VARCHAR}
+    </if>
+    
+  </select>
+  
+  <select id="findColumnSetting" resultMap="BaseResultMap" parameterType="com.ovit.bee.pojo.ColumnSettings" >
+    SELECT DISTINCT column_name FROM column_settings
+    where user_account = #{userAccount,jdbcType=VARCHAR}
+  </select>
+
+  <insert id="insert" parameterType="java.util.List" >
+  	<![CDATA[
+		replace into column_settings (id, user_account, column_id, column_name, security, `order`, status, last_update_time) 
+        values
+		]]>
+		<foreach collection="list" item="item" index="index" separator=",">
+	(#{item.id},#{item.userAccount},#{item.columnId},#{item.columnName},#{item.security},#{item.order},#{item.status},now())
+		</foreach>
+  </insert>
+  
+  
+  <update id="updateByPrimaryKey" parameterType="com.ovit.bee.pojo.ColumnSettings" >
+    update column_settings
+    set user_account = #{userAccount,jdbcType=VARCHAR},
+      column_id = #{columnId,jdbcType=INTEGER},
+      column_name = #{columnName,jdbcType=VARCHAR},
+      security = #{security,jdbcType=INTEGER},
+      order = #{order,jdbcType=INTEGER},
+      status = #{status,jdbcType=INTEGER},
+      last_update_time = #{lastUpdateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

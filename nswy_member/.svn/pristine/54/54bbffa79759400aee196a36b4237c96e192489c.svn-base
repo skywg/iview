@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ovit.bee.IDao.LoginUserMapper" >
+  <resultMap id="BaseResultMap" type="com.ovit.bee.pojo.LoginUser" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="unique_id" property="uniqueId" jdbcType="VARCHAR" />
+    <result column="login_account" property="loginAccount" jdbcType="VARCHAR" />
+    <result column="display_name" property="displayName" jdbcType="VARCHAR" />
+    <result column="login_passwd" property="loginPasswd" jdbcType="VARCHAR" />
+    <result column="register_time" property="registerTime" jdbcType="TIMESTAMP" />
+    <result column="is_Identity_verification" property="isIdentityVerification" jdbcType="INTEGER" />
+    <result column="tour_number" property="tourNumber" jdbcType="INTEGER" />
+    <result column="user_type" property="userType" jdbcType="INTEGER" />
+    <result column="signature" property="signaTure" jdbcType="VARCHAR" />
+    <result column="avatar" property="avatar" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, unique_id, login_account, display_name, login_passwd, register_time, is_Identity_verification, 
+    tour_number, user_type,signature,avatar
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from login_user
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  
+   <select id="findByLoginName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from login_user
+    where login_account = #{login_account,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="findFriendByLoginName" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from login_user
+   u WHERE  EXISTS ( SELECT 1 FROM myfriend f WHERE f.friend=u.login_account and f.account=#{login_account,jdbcType=VARCHAR})
+  </select>
+  
+  <select id="login" resultMap="BaseResultMap" parameterType="java.util.Map" >
+    select 
+    <include refid="Base_Column_List" />
+    from login_user
+    where login_account = #{login_account,jdbcType=VARCHAR} and login_passwd =  #{login_passwd,jdbcType=VARCHAR}
+  </select>
+  
+  <select id="findAll" resultMap="BaseResultMap">
+  	select * from login_user
+  </select>
+  
+  <!-- 查询访问总量 -->
+  <select id="findTourNumber" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from login_user l
+    where l.login_account = #{userId,jdbcType=VARCHAR}
+  </select>
+ <!--  通过圈子主题id查询副版主信息 -->
+  <select id="findModeratorById" resultType="Map" parameterType="java.lang.Integer" >
+  SELECT  l.*,CASE WHEN c.type=1 THEN '副版主' WHEN c.type=2 THEN '版主' END AS TYPE FROM coterie_member c,login_user l  WHERE
+ c.`coterie_id`=#{coterie_id,jdbcType=INTEGER} AND c.`type`>0 AND c.`account`=l.`login_account` order BY c.type DESC
+
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from login_user
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.ovit.bee.pojo.LoginUser" >
+    insert into login_user (id, unique_id, login_account, 
+      display_name, login_passwd, register_time, 
+      is_Identity_verification, tour_number, user_type,signature,avatar
+      )
+    values (#{id,jdbcType=INTEGER}, #{uniqueId,jdbcType=VARCHAR}, #{loginAccount,jdbcType=VARCHAR}, 
+      #{displayName,jdbcType=VARCHAR}, #{loginPasswd,jdbcType=VARCHAR}, #{registerTime,jdbcType=TIMESTAMP}, 
+      #{isIdentityVerification,jdbcType=INTEGER}, #{tourNumber,jdbcType=INTEGER}, #{userType,jdbcType=INTEGER},
+      #{signaTure,jdbcType=VARCHAR},#{avatar,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.ovit.bee.pojo.LoginUser" >
+    insert into login_user
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="uniqueId != null" >
+        unique_id,
+      </if>
+      <if test="loginAccount != null" >
+        login_account,
+      </if>
+      <if test="displayName != null" >
+        display_name,
+      </if>
+      <if test="loginPasswd != null" >
+        login_passwd,
+      </if>
+      <if test="registerTime != null" >
+        register_time,
+      </if>
+      <if test="isIdentityVerification != null" >
+        is_Identity_verification,
+      </if>
+      <if test="tourNumber != null" >
+        tour_number,
+      </if>
+      <if test="userType != null" >
+        user_type,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="uniqueId != null" >
+        #{uniqueId,jdbcType=VARCHAR},
+      </if>
+      <if test="loginAccount != null" >
+        #{loginAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="displayName != null" >
+        #{displayName,jdbcType=VARCHAR},
+      </if>
+      <if test="loginPasswd != null" >
+        #{loginPasswd,jdbcType=VARCHAR},
+      </if>
+      <if test="registerTime != null" >
+        #{registerTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isIdentityVerification != null" >
+        #{isIdentityVerification,jdbcType=INTEGER},
+      </if>
+      <if test="tourNumber != null" >
+        #{tourNumber,jdbcType=INTEGER},
+      </if>
+      <if test="userType != null" >
+        #{userType,jdbcType=INTEGER},
+      </if>
+       #{signature,jdbcType=VARCHAR},#{avatar,jdbcType=VARCHAR}
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ovit.bee.pojo.LoginUser" >
+    update login_user
+    <set >
+      <if test="uniqueId != null" >
+        unique_id = #{uniqueId,jdbcType=VARCHAR},
+      </if>
+      <if test="loginAccount != null" >
+        login_account = #{loginAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="displayName != null" >
+        display_name = #{displayName,jdbcType=VARCHAR},
+      </if>
+      <if test="loginPasswd != null" >
+        login_passwd = #{loginPasswd,jdbcType=VARCHAR},
+      </if>
+      <if test="registerTime != null" >
+        register_time = #{registerTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="isIdentityVerification != null" >
+        is_Identity_verification = #{isIdentityVerification,jdbcType=INTEGER},
+      </if>
+      <if test="tourNumber != null" >
+        tour_number = #{tourNumber,jdbcType=INTEGER},
+      </if>
+      <if test="userType != null" >
+        user_type = #{userType,jdbcType=INTEGER},
+      </if>
+       #{signature,jdbcType=VARCHAR},#{avatar,jdbcType=VARCHAR}
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ovit.bee.pojo.LoginUser" >
+    update login_user
+    set unique_id = #{uniqueId,jdbcType=VARCHAR},
+      login_account = #{loginAccount,jdbcType=VARCHAR},
+      display_name = #{displayName,jdbcType=VARCHAR},
+      login_passwd = #{loginPasswd,jdbcType=VARCHAR},
+      register_time = #{registerTime,jdbcType=TIMESTAMP},
+      is_Identity_verification = #{isIdentityVerification,jdbcType=INTEGER},
+      tour_number = #{tourNumber,jdbcType=INTEGER},
+      user_type = #{userType,jdbcType=INTEGER},
+      signature= #{signature,jdbcType=VARCHAR},
+      avatar=  #{avatar,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,336 @@
+package com.ovit.bee.web;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.ovit.bee.pojo.FavoriteInfomation;
+import com.ovit.bee.pojo.FavoriteKnowledge;
+import com.ovit.bee.pojo.FavoritePolicy;
+import com.ovit.bee.pojo.LoginUser;
+import com.ovit.bee.pojo.Species;
+import com.ovit.bee.service.FavoriteInfomationService;
+import com.ovit.bee.service.FavoriteKnowledgeService;
+import com.ovit.bee.service.FavoritePolicyService;
+import com.ovit.bee.service.IndividuationService;
+import com.ovit.bee.service.SpecieService;
+
+@Controller
+@RequestMapping("/indivi")
+public class IndividuationController {
+	@Autowired
+	private IndividuationService individuationService;
+	
+	@Autowired
+	private SpecieService service;
+	
+	@Autowired
+	private FavoriteKnowledgeService fkservice;
+	
+	@Autowired
+	private FavoritePolicyService fpservice;
+	
+	@Autowired
+	private FavoriteInfomationService fiservice;
+	
+	//通过类别查找物种
+	@ResponseBody
+	@RequestMapping(value="species",method = RequestMethod.POST)
+	private List<String> listspecies(@RequestBody Map<String, Object> params,HttpServletRequest request){
+		List<String> spec=(List<String>) params.get("species");
+		List<String> result=null;
+		if(spec.size()==0){
+			return result;
+		}else{
+			List<String> species=new ArrayList<>();
+			for(String s:spec){
+				System.out.println(s);
+				species.add(s);
+			}
+			result=individuationService.selectByLeib(species);
+			return result;
+		}
+		
+	}
+	
+	
+	//保存关注的物种
+		@ResponseBody
+		@RequestMapping(value="save",method = RequestMethod.POST)
+		private String savespecies(@RequestBody Map<String, Object> params,HttpServletRequest request){
+			HttpSession session = request.getSession();
+			LoginUser loginUser = (LoginUser) session.getAttribute("currentUser");
+			String account=loginUser.getLoginAccount();
+			List<String> spec=(List<String>) params.get("species");
+			List<Species> result=new ArrayList<>();
+			if(spec.size()==0){
+				return null;
+			}else{
+				for(String s:spec){
+					Species spc=new Species();
+					spc.setAccount(account);
+					spc.setCreateTime(new Date());
+					spc.setSpeciesName(s);
+					result.add(spc);
+				}
+				service.insert(result);
+				return "OK";
+			}
+			
+		}
+		
+		
+		//保存关注知识
+				@ResponseBody
+				@RequestMapping(value="ledge",method = RequestMethod.POST)
+				private String saveklge(@RequestBody Map<String, Object> params,HttpServletRequest request){
+					HttpSession session = request.getSession();
+					LoginUser loginUser = (LoginUser) session.getAttribute("currentUser");
+					String account=loginUser.getLoginAccount();
+					List<String> spec=(List<String>) params.get("ledge");
+					List<String> leibie=(List<String>) params.get("leibie");
+					FavoriteKnowledge fk=new FavoriteKnowledge();
+					String know=null;
+					if(spec.size()==0&leibie.size()==0){
+						return null;
+					}else{
+						for(int i=0;i<spec.size();i++){
+							if(i==0){
+								know=spec.get(0);
+							}else{
+								know+=","+spec.get(i);
+							}
+						}
+					}
+					try{
+						FavoriteKnowledge fav=fkservice.selectByAccount(account);
+						if(fav==null){
+								fk.setAccount(account);
+								fk.setCreateTime(new Date());
+								fk.setCategory(know);
+								if(leibie.contains("关联产品")){
+									fk.setReferProduct(1);
+								}else{
+									fk.setReferProduct(0);
+								}
+								if(leibie.contains("关联物种")){
+									fk.setReferSpecies(1);
+								}else{
+									fk.setReferSpecies(0);
+								}
+								if(leibie.contains("关联服务")){
+									fk.setReferService(1);
+								}else{
+									fk.setReferService(0);
+								}
+								int num=fkservice.insert(fk);
+								if(num==1){
+									return "OK";
+								}
+						}else{
+							fav.setCreateTime(new Date());
+							fav.setCategory(know);
+								if(leibie.contains("关联产品")){
+									fav.setReferProduct(1);
+								}else{
+									fav.setReferProduct(0);
+								}
+								if(leibie.contains("关联物种")){
+									fav.setReferSpecies(1);
+								}else{
+									fav.setReferSpecies(0);
+								}
+								if(leibie.contains("关联服务")){
+									fav.setReferService(1);
+								}else{
+									fav.setReferService(0);
+								}
+								int num=fkservice.insert(fav);
+								if(num==2){
+									return "OK";
+								}
+								
+							
+						}
+					}catch (Exception e) {
+						// TODO: handle exception
+					}
+					
+					return null;
+				}
+				
+				
+				
+				
+		//保存关注的咨询
+				@ResponseBody
+				@RequestMapping(value="info",method = RequestMethod.POST)
+				private String savefi(@RequestBody Map<String, Object> params,HttpServletRequest request){
+					HttpSession session = request.getSession();
+					LoginUser loginUser = (LoginUser) session.getAttribute("currentUser");
+					String account=loginUser.getLoginAccount();
+					List<String> spec=(List<String>) params.get("ledge");
+					List<String> leibie=(List<String>) params.get("leibie");
+					FavoriteInfomation fk=new FavoriteInfomation();
+					String know=null;
+					if(spec.size()==0&leibie.size()==0){
+						return null;
+					}else{
+						for(int i=0;i<spec.size();i++){
+							if(i==0){
+								know=spec.get(0);
+							}else{
+								know+=","+spec.get(i);
+							}
+						}
+					}
+					try{
+						FavoriteInfomation fav=fiservice.selectByAccount(account);
+						if(fav==null){
+								fk.setAccount(account);
+								fk.setCreateTime(new Date());
+								fk.setCategory(know);
+								if(leibie.contains("关联产品")){
+									fk.setReferProduct(1);
+								}else{
+									fk.setReferProduct(0);
+								}
+								if(leibie.contains("关联物种")){
+									fk.setReferSpecies(1);
+								}else{
+									fk.setReferSpecies(0);
+								}
+								if(leibie.contains("关联服务")){
+									fk.setReferService(1);
+								}else{
+									fk.setReferService(0);
+								}
+								int num=fiservice.insert(fk);
+								if(num==1){
+									return "OK";
+								}
+						}else{
+							fav.setCreateTime(new Date());
+							fav.setCategory(know);
+								if(leibie.contains("关联产品")){
+									fav.setReferProduct(1);
+								}else{
+									fav.setReferProduct(0);
+								}
+								if(leibie.contains("关联物种")){
+									fav.setReferSpecies(1);
+								}else{
+									fav.setReferSpecies(0);
+								}
+								if(leibie.contains("关联服务")){
+									fav.setReferService(1);
+								}else{
+									fav.setReferService(0);
+								}
+								int num=fiservice.insert(fav);
+								if(num==2){
+									return "OK";
+								}
+								
+							
+						}
+					}catch (Exception e) {
+						// TODO: handle exception
+					}
+					
+					return null;
+				}
+				
+				
+			//保存关注的政策
+				@ResponseBody
+				@RequestMapping(value="policy",method = RequestMethod.POST)
+				private String savepolicy(@RequestBody Map<String, Object> params,HttpServletRequest request){
+					HttpSession session = request.getSession();
+					LoginUser loginUser = (LoginUser) session.getAttribute("currentUser");
+					String account=loginUser.getLoginAccount();
+					List<String> spec=(List<String>) params.get("ledge");
+					List<String> leibie=(List<String>) params.get("leibie");
+					FavoritePolicy fk=new FavoritePolicy();
+					String know=null;
+					if(spec.size()==0&leibie.size()==0){
+						return null;
+					}else{
+						for(int i=0;i<spec.size();i++){
+							if(i==0){
+								know=spec.get(0);
+							}else{
+								know+=","+spec.get(i);
+							}
+						}
+					}
+					try{
+						FavoritePolicy fav=fpservice.selectByAccount(account);
+						if(fav==null){
+								fk.setAccount(account);
+								fk.setCreateTime(new Date());
+								fk.setCategory(know);
+								if(leibie.contains("关联产品")){
+									fk.setReferProduct(1);
+								}else{
+									fk.setReferProduct(0);
+								}
+								if(leibie.contains("关联物种")){
+									fk.setReferSpecies(1);
+								}else{
+									fk.setReferSpecies(0);
+								}
+								if(leibie.contains("关联服务")){
+									fk.setReferService(1);
+								}else{
+									fk.setReferService(0);
+								}
+								int num=fpservice.insert(fk);
+								if(num==1){
+									return "OK";
+								}
+						}else{
+							fav.setCreateTime(new Date());
+							fav.setCategory(know);
+								if(leibie.contains("关联产品")){
+									fav.setReferProduct(1);
+								}else{
+									fav.setReferProduct(0);
+								}
+								if(leibie.contains("关联物种")){
+									fav.setReferSpecies(1);
+								}else{
+									fav.setReferSpecies(0);
+								}
+								if(leibie.contains("关联服务")){
+									fav.setReferService(1);
+								}else{
+									fav.setReferService(0);
+								}
+								int num=fpservice.insert(fav);
+								if(num==2){
+									return "OK";
+								}
+								
+							
+						}
+					}catch (Exception e) {
+						// TODO: handle exception
+					}
+					
+					return null;
+				}
+	
+	}
+
